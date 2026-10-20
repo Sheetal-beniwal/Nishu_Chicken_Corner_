@@ -1,0 +1,21 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environments
+.venv/
+
+# Secrets — NEVER commit API keys
+.env
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+.DS_Store

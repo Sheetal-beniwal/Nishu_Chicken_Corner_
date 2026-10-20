@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>निशु चिकन कॉर्नर — AI Order System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <!-- Floating decorative blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="app-wrapper">
+        <!-- Header / Hero -->
+        <header class="hero">
+            <div class="hero-icon">🍗</div>
+            <h1>निशु चिकन कॉर्नर</h1>
+            <p class="tagline">Veg &amp; Non-Veg &bull; Taste You'll Love</p>
+            <p class="contact">📞 9466165333 &bull; 9466265333 &bull; Delivery upto 5 km</p>
+        </header>
+
+        <!-- Menu Section -->
+        <section class="menu-section">
+            <h2 class="section-title"><span class="icon">📋</span> Our Menu</h2>
+
+            <!-- Main Dishes -->
+            <div class="menu-category">
+                <h3 class="category-title">🍛 Main Dishes</h3>
+                <div class="menu-grid">
+                    {% for dish, info in menu.items() %}
+                        {% if dish in ['Tari Chicken', 'Half Tari Chicken', 'Chilli Chicken', 'Half Chilli Chicken', 'Butter Chicken', 'Half Butter Chicken', 'Lemon Chicken', 'Half Lemon Chicken', 'Punjabi Chicken', 'Half Punjabi Chicken'] %}
+                        <div class="menu-card">
+                            <div class="card-top">
+                                <span class="dish-name">{{ dish }}</span>
+                                <span class="dish-badge available">Qty: {{ info.available_qty }}</span>
+                            </div>
+                            <div class="card-bottom">
+                                <span class="dish-price">₹{{ info.price | int }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Snacks -->
+            <div class="menu-category">
+                <h3 class="category-title">🍿 Crunchy Snacks</h3>
+                <div class="menu-grid">
+                    {% for dish, info in menu.items() %}
+                        {% if dish in ['Chicken Pakore', 'Half Chicken Pakore', 'Tari Palate', 'Half Tari Palate', 'Egg Bhurji', 'Pasta', 'Chowmein', 'Chana chaat'] %}
+                        <div class="menu-card">
+                            <div class="card-top">
+                                <span class="dish-name">{{ dish }}</span>
+                                <span class="dish-badge available">Qty: {{ info.available_qty }}</span>
+                            </div>
+                            <div class="card-bottom">
+                                <span class="dish-price">₹{{ info.price | int }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Essentials -->
+            <div class="menu-category">
+                <h3 class="category-title">🫓 Essentials &amp; Sides</h3>
+                <div class="menu-grid">
+                    {% for dish, info in menu.items() %}
+                        {% if dish in ['Simple Roti', 'Missi Roti', 'Dahi', 'Dahi Raita', 'Salad', 'Half Salad'] %}
+                        <div class="menu-card">
+                            <div class="card-top">
+                                <span class="dish-name">{{ dish }}</span>
+                                <span class="dish-badge available">Qty: {{ info.available_qty }}</span>
+                            </div>
+                            <div class="card-bottom">
+                                <span class="dish-price">₹{{ info.price | int }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Order Section -->
+        <section class="order-section">
+            <h2 class="section-title"><span class="icon">🛒</span> Place Your Order</h2>
+            <form id="order-form">
+                <div class="input-group">
+                    <textarea id="order-input" name="order_text" placeholder="e.g. I would like 2 Butter Chicken" required></textarea>
+                    <button type="submit" id="submit-btn">
+                        <span class="btn-text">Submit Order</span>
+                        <span class="btn-loader" style="display:none;">⏳ Processing...</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Result Section -->
+        <section id="result-section" class="result-section" style="display:none;">
+            <h2 class="section-title"><span class="icon">📦</span> Order Status</h2>
+            <div id="result-content" class="result-content"></div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by AI &bull; निशु चिकन कॉर्नर &bull; Taste guaranteed 🔥</p>
+        </footer>
+    </div>
+
+    <script>
+        const form = document.getElementById('order-form');
+        const resultSection = document.getElementById('result-section');
+        const resultContent = document.getElementById('result-content');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoader = submitBtn.querySelector('.btn-loader');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            // Show loading state
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+            try {
+                const response = await fetch('/process_order', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await response.json();
+                renderResult(data);
+            } catch (err) {
+                resultContent.innerHTML = `
+                    <div class="result-card error">
+                        <div class="result-icon">❌</div>
+                        <p>Something went wrong. Please try again.</p>
+                    </div>`;
+                resultSection.style.display = 'block';
+            } finally {
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        function renderResult(data) {
+            resultSection.style.display = 'block';
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+
+            // Determine overall result type
+            const status = data.status || '';
+            const message = data.message || '';
+            let type = 'info';
+            let icon = 'ℹ️';
+            if (status === 'served' || message.toLowerCase().includes('ready') || message.toLowerCase().includes('enjoy')) {
+                type = 'success';
+                icon = '✅';
+            } else if (status.includes('fail') || message.toLowerCase().includes('sorry') || message.toLowerCase().includes('apologize')) {
+                type = 'error';
+                icon = '❌';
+            } else if (status === 'partial' || status === 'unavailable') {
+                type = 'warning';
+                icon = '⚠️';
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-card ${type}">
+                    <div class="result-icon">${icon}</div>
+                    <div class="result-message">${message}</div>
+                    <div class="result-details">
+                        <div class="detail-row">
+                            <span class="detail-label">🍽️ Dish</span>
+                            <span class="detail-value">${data.dish_name || 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">📦 Requested Qty</span>
+                            <span class="detail-value">${data.required_qty || 0}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">✅ Available Qty</span>
+                            <span class="detail-value">${data.available_qty || 0}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">📊 Status</span>
+                            <span class="detail-value status-badge status-${type}">${status.replace(/_/g, ' ').toUpperCase()}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">🔄 Order Retries</span>
+                            <span class="detail-value">${data.order_retry}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">👨‍🍳 Cook Retries</span>
+                            <span class="detail-value">${data.cook_retry}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">🍽️ Serve Retries</span>
+                            <span class="detail-value">${data.serve_retry}</span>
+                        </div>
+                    </div>
+                </div>`;
+        }
+    </script>
+</body>
+</html>

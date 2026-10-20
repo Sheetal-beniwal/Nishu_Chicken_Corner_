@@ -1,0 +1,31 @@
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "restaurantagent"
+version = "0.1.0"
+description = "Restaurant order management AI agent prototype"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.111.0,<0.112.0",
+    "uvicorn>=0.30.0,<0.31.0",
+    "python-dotenv>=1.0.0,<2.0.0",
+    "langgraph>=0.0.31,<0.1.0",
+    "httpx>=0.27.0,<0.28.0",
+    "pydantic>=2.7.0,<3.0.0",
+    "Pillow>=10.3.0,<11.0.0",
+    "pdfplumber>=0.10.0,<0.11.0",
+]
+
+[tool.setuptools]
+py-modules = ["app"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["static/*", "templates/*", "निशु चिकन कॉर्नर.pdf"]
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
